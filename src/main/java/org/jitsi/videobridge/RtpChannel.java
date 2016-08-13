@@ -1860,13 +1860,37 @@ public class RtpChannel
         addedSSRCs.removeAll(oldSignaledSSRCs);
         if (!addedSSRCs.isEmpty())
         {
+            Recorder recorder = null;
+            Endpoint endpoint = null;
+            Synchronizer synchronizer = null;
+            if (getContent().isRecording()) {
+                recorder = getContent().getRecorder();
+                endpoint = getEndpoint();
+                if (endpoint != null && recorder != null) {
+                    synchronizer = recorder.getSynchronizer();
+                }
+            }
+
             for (Integer addedSSRC : addedSSRCs)
             {
                 try
                 {
                     // Do allow the number of explicitly signalled SSRCs to
                     // exceed the limit.
-                    addReceiveSSRC(addedSSRC, false);
+                    if (addReceiveSSRC(addedSSRC, false))
+                    {
+                        /*
+                         * If a new SSRC has been detected on this channel, and a
+                         * Recorder is running, it needs to be notified, so that it
+                         * can map the new SSRC to an endpoint.
+                         */
+                        if (synchronizer != null)
+                        {
+                            synchronizer.setEndpoint(
+                                    addedSSRC & 0xffffffffL,
+                                    endpoint.getID());
+                        }
+                    }
                 }
                 catch (SizeExceededException see)
                 {
