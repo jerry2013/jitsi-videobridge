@@ -1009,6 +1009,9 @@ public class RtpChannel
             {
                 eventAdmin.sendEvent(EventFactory.streamStarted(this));
             }
+
+            // If the content is being recorded, set using the existing synchronizer
+            getContent().feedKnownSsrcsToSynchronizer();
         }
 
         if (logger.isTraceEnabled())

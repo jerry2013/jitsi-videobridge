@@ -955,6 +955,10 @@ public class Conference
                     eventAdmin.sendEvent(
                             EventFactory.endpointCreated(endpoint));
                 }
+
+                // Conference is being recorded so update the endpoints json.
+                if (isRecording() && endpointRecorder != null)
+                    endpointRecorder.updateEndpoint(endpoint);
             }
         }
 
@@ -1134,6 +1138,7 @@ public class Conference
             if (isRecording())
             {
                 content.setRecording(true, getRecordingPath());
+                content.feedKnownSsrcsToSynchronizer();
             }
             contents.add(content);
         }
